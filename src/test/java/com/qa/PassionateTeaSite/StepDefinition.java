@@ -22,18 +22,23 @@ public class StepDefinition {
 	public ExtentTest test; 
 	
 	
+	
+	
 	@Before 
 	public void setUp()
 	{
 		System.setProperty("webdriver.chrome.driver", Constants.chromeDrive);
 		driver = new ChromeDriver(); 
+		
+		report = new ExtentReports(Constants.reportFilePath, false);
+		
 	}
 	
 	@Given("^the correct web address$")
 	public void the_correct_web_address() 
 	{
 	    driver.get(Constants.home); 
-	    report = new ExtentReports(Constants.reportFilePath, false);
+	    
 	}
 
 	@When("^I navigate to the 'Menu' page$")
@@ -51,14 +56,16 @@ public class StepDefinition {
 		test.log(LogStatus.INFO, "Browse Items");
 		MenuPage menu = PageFactory.initElements(driver, MenuPage.class);
 		//should I not have the green tea in a format such that 
-		if(menu.getBrowseAllItems().getText().contains("green tea"))
-		{
-			test.log(LogStatus.PASS, "Browsing Items");
-		}
-		else
-		{
-			test.log(LogStatus.FAIL, "Not Browsing Items");
-		}
+//		if(menu.getBrowseAllItems().getText().contains("green tea"))
+//		{
+//			System.out.println(menu.getBrowseAllItems().getText());
+//			test.log(LogStatus.PASS, "Browsing Items");
+//		}
+//		else
+//		{
+//			System.out.println("no tea");
+//			test.log(LogStatus.FAIL, "Not Browsing Items");
+//		}
 		assertEquals("Can't Browse Items", "green tea", menu.getBrowseAllItems().getText());
 	}
 
@@ -71,23 +78,30 @@ public class StepDefinition {
 	public void i_click_the_checkout_button() 
 	{
 		//Is there a better way to check all the different combinations of the tea class that you want 
-		MenuPage menu = PageFactory.initElements(driver, MenuPage.class);
-		menu.clickCheckout("green tea");
+		HomePage home = PageFactory.initElements(driver, HomePage.class);
+		home.clickMenu();
+		
 	}
 
 	@Then("^I am taken to the checkout page$")
 	public void i_am_taken_to_the_checkout_page() 
 	{
-		
+		MenuPage menu = PageFactory.initElements(driver, MenuPage.class);
+		menu.clickCheckout("green tea");
+		assertEquals("Not Taken To The Checkout Page", Constants.checkoutTitle, driver.getTitle());
 	}
 	
 	
-	
-//	
-//	@After
-//	public void tearDown()
-//	{
-//		//driver.quit();
-//	}
+	@After
+	public void tearDown()
+	{
+		
+		
+		report.endTest(test);
+		
+		report.flush();
+		
+		driver.quit();
+	}
 		
 }
